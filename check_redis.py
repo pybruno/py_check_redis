@@ -8,14 +8,15 @@ from optparse import OptionParser
 
 class NagiosRedis(object):
 
-    def __init__(self, host, port, password, bdname):
+    def __init__(self, host, port, username, password, dbname):
         self.host = host
+        self.username = username
         self.password = password
         self.port = port
-        self.dbname = bdname
+        self.dbname = dbname
 
         try:
-            self.conn = redis.Redis(host=self.host, port=self.port, password=self.password, socket_timeout=1)
+            self.conn = redis.Redis(host=self.host, port=self.port, username=self.username, password=self.password, socket_timeout=1)
             self.info_out = self.conn.info()
             self.conn.ping()
 
@@ -65,8 +66,9 @@ def build_parser():
     :return: parser config
     """
     parser = OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
-    parser.add_option("-H", "--host", dest="host", help="Redis server to connect to.", default=False)
+    parser.add_option("-H", "--host", dest="host", help="Redis server to connect to.", default='127.0.0.1')
     parser.add_option("-p", "--port", dest="port", help="Redis port to connect to.", type="int", default=6379)
+    parser.add_option("-u", "--username", dest="username", help="Redis username.",  default='default')
     parser.add_option("-P", "--password", dest="password", help="Redis password to connect to.",  default='')
     parser.add_option("-d", "--dbname", dest="dbname", help="Redis database name, default is db0", default='db0')
     parser.add_option("-t", "--timeout", dest="timeout",
@@ -85,5 +87,5 @@ if __name__ == "__main__":
         sys.exit(0)
 
     else:
-        server = NagiosRedis(options.host, options.port, options.password, options.dbname)
+        server = NagiosRedis(options.host, options.port, options.username, options.password, options.dbname)
         server.nagios_check()
